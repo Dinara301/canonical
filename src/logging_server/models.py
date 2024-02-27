@@ -1,10 +1,12 @@
-from datetime import datetime
-from typing import Dict, Union
+from datetime import datetime, timezone
+from typing import Dict, Union, Annotated
 
-from pydantic import BaseModel, Field, UUID4, field_serializer, model_serializer
+from pydantic import BaseModel, Field, UUID4, field_serializer, model_serializer, validator, field_validator
+from fastapi import Query
 
 
-class LogItem(BaseModel):
+# Base model for log items, allow extra fields
+class LogItem(BaseModel, extra='allow'):
     # Field(...) makes fields to be required
     service_id: UUID4 = Field(...)
     # Assuming that all audit logs can be connected to a specific user,
@@ -15,20 +17,13 @@ class LogItem(BaseModel):
     description: str = Field(...)
     # optional fields
     actor_id: UUID4 = None
-    extra_fields: Union[Dict[str, str], None] = None
 
-    @model_serializer()
-    def serialize_model(self):
-        partial_res = {'service_id': self.service_id,
-                       'customer_id': self.customer_id,
-                       'event_type': self.event_type,
-                       'event_timestamp': self.event_timestamp,
-                       'description': self.description,
-                       'actor_id': self.actor_id
-                       }
-        if self.extra_fields is not None:
-            return {**partial_res, **self.extra_fields}
-        return partial_res
+    @field_validator("service_id", "customer_id", "actor_id")
+    def validate_uuids(cls, value):
+        if value:
+            return str(value)
+        return value
+
 
     # TODO think of other possible fields
 
@@ -37,7 +32,7 @@ class LogItem(BaseModel):
             "example": {
                 "service_id": "550e8400-e29b-41d4-a716-446655440000",
                 "customer_id": "cac22779-bbf7-442b-a609-736d2429d0b3",
-                "event_type": "CREATION",
+                "event_type": "CREATE",
                 "event_timestamp": datetime(2011, 11, 4, 0, 0),
                 "description": "The new account is created"
             }
