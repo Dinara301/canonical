@@ -6,6 +6,8 @@ services:
       context: .
       args:
         requirements_file: ./requirements.txt
+    environment:
+      - DATABASE_URL=mongodb://mongodb:27017
     stdin_open: true
     tty: true
     ports:

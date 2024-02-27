@@ -10,8 +10,18 @@ from urllib.parse import parse_qs
 router = APIRouter()
 
 
+# TODO: see Readme for better design
+# TODO: add versioning
+# TODO: logging of the service itself is needed for debugging
+# TODO: error specific handlers for better client experience and easier debugging
 @router.put("/log/")
 async def create_log(item: LogItem, db=Depends(get_db_session)):
+    """
+    Async request handler for adding log
+    :param item: Request body in Pydantic type LogItem
+    :param db: mongodb collection dependency
+    :return: basic Response
+    """
     await add_log(item, db)
     return Response(status_code=status.HTTP_200_OK)
 
@@ -22,12 +32,22 @@ async def create_log(item: LogItem, db=Depends(get_db_session)):
 # TODO: add fields validation
 
 # TODO: For pagination last datetime from the previous query is used, it can lead to duplicates
+# last_seen_datetime parameter is added directly
 @router.get("/log/")
-async def fetch_logs(request: Request, limit: int = 10, last_seen_datetime: datetime = None, db=Depends(get_db_session), response_model=List[LogItem]):
+async def fetch_logs(request: Request, limit: int = 10, last_seen_datetime: datetime = None, db=Depends(get_db_session),
+                     response_model=List[LogItem]):
+    """
+    Request handler fore retrieving logs that meet filters requirements
+    :param request: request with all query parameters
+    :param limit: limit for the number of logs returned, default 10
+    :param last_seen_datetime: datetime of the last retrieved log, for pagination
+    :param db: mongodb collection
+    :param response_model: model that is expected in response
+    :return:
+    """
     query_params = parse_qs(request.url.query)
     print(limit)
     print(last_seen_datetime)
     query_params.pop('limit', None)
     query_params.pop('last_seen_datetime', None)
-    response = await get_log(query_params, limit, last_seen_datetime, db)
-    return response
+    return await get_log(query_params, limit, last_seen_datetime, db)

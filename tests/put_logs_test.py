@@ -23,7 +23,6 @@ async def test_log_put(test_setup):
                                            "extra_field2": "6"}
                             )
     assert response.status_code == 200
-    # print(await test_collection.find_one())
     log_added = await test_collection.find_one({"$and": [{"service_id": service_id},
                                                     {"customer_id": customer_id},
                                                     {"extra_field1": "5"}, {"extra_field2": "6"}]})

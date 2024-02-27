@@ -22,7 +22,7 @@ class LogItem(BaseModel, extra='allow'):
             return str(value)
         return value
 
-    # TODO think of other possible fields
+    # TODO think of other possible fields, e.g. CorrelationId
 
     class Config:
         arbitrary_types_allowed = True
