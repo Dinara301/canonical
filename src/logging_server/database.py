@@ -10,7 +10,6 @@ from src.constants import INDEX_NAME
 from src.logging_server.models import LogItem
 
 MONGO_DETAILS = os.environ.get("DATABASE_URL", "mongodb://mongodb:27017")
-print(MONGO_DETAILS)
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
 database = client.log
 collection = database.get_collection("service_log")

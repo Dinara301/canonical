@@ -46,8 +46,6 @@ async def fetch_logs(request: Request, limit: int = 10, last_seen_datetime: date
     :return:
     """
     query_params = parse_qs(request.url.query)
-    print(limit)
-    print(last_seen_datetime)
     query_params.pop('limit', None)
     query_params.pop('last_seen_datetime', None)
     return await get_log(query_params, limit, last_seen_datetime, db)
