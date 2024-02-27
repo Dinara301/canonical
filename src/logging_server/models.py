@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Union
 
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID4, field_serializer, model_serializer
 
 
 class LogItem(BaseModel):
@@ -14,8 +14,22 @@ class LogItem(BaseModel):
     event_timestamp: datetime = Field(...)
     description: str = Field(...)
     # optional fields
-    actor_id:  UUID4 = None
+    actor_id: UUID4 = None
     extra_fields: Union[Dict[str, str], None] = None
+
+    @model_serializer()
+    def serialize_model(self):
+        partial_res = {'service_id': self.service_id,
+                       'customer_id': self.customer_id,
+                       'event_type': self.event_type,
+                       'event_timestamp': self.event_timestamp,
+                       'description': self.description,
+                       'actor_id': self.actor_id
+                       }
+        if self.extra_fields is not None:
+            return {**partial_res, **self.extra_fields}
+        return partial_res
+
     # TODO think of other possible fields
 
     class Config:
