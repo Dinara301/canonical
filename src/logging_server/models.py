@@ -1,8 +1,6 @@
-from datetime import datetime, timezone
-from typing import Dict, Union, Annotated
+from datetime import datetime
 
-from pydantic import BaseModel, Field, UUID4, field_serializer, model_serializer, validator, field_validator
-from fastapi import Query
+from pydantic import BaseModel, Field, UUID4, field_validator
 
 
 # Base model for log items, allow extra fields
@@ -24,11 +22,11 @@ class LogItem(BaseModel, extra='allow'):
             return str(value)
         return value
 
-
     # TODO think of other possible fields
 
     class Config:
-        schema_extra = {
+        arbitrary_types_allowed = True
+        json_schema_extra = {
             "example": {
                 "service_id": "550e8400-e29b-41d4-a716-446655440000",
                 "customer_id": "cac22779-bbf7-442b-a609-736d2429d0b3",

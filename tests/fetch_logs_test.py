@@ -1,11 +1,12 @@
 import pytest
 
+events = ["create", "create", "delete", "update"]
+events_timestamp = ["2024-02-22T08:47:36.869Z", "2023-02-22T08:47:36.869Z", "2024-01-22T08:47:36.869Z",
+                    "2024-02-22T08:47:36.869Z"]
+service_ids = ["098c0a6d-c5b6-410d-b1ae-2942cc581dda", "93b05549-4a11-42d0-b11e-4adc70f308bc",
+               "b354036a-ca60-483f-9e57-1da5707b56e8", "351e321a-cd75-4f58-a0a5-3f7a92288bdf"]
+
 def fill_in_test_collection(test_app):
-    events = ["create", "create", "delete", "update"]
-    events_timestamp = ["2024-02-22T08:47:36.869Z", "2023-02-22T08:47:36.869Z", "2024-01-22T08:47:36.869Z",
-                        "2024-02-22T08:47:36.869Z"]
-    service_ids = ["098c0a6d-c5b6-410d-b1ae-2942cc581dda", "93b05549-4a11-42d0-b11e-4adc70f308bc",
-                   "b354036a-ca60-483f-9e57-1da5707b56e8", "351e321a-cd75-4f58-a0a5-3f7a92288bdf"]
     for i, id in enumerate(service_ids):
         test_app.put("/log", json={"service_id": service_ids[i],
                                    "customer_id": service_ids[i],
@@ -21,8 +22,25 @@ def clean_collection(test_setup):
     test_collection.delete_many({})
 
 @pytest.mark.asyncio
-async def test_log_fetch(test_setup, clean_collection):
+async def test_log_fetch_all(test_setup, clean_collection):
     test_app, test_collection = test_setup
     fill_in_test_collection(test_app)
-    response = test_app.get("/log/?limit=20&event_timestamp=2024-02-22T08:47:36.869Z")
+    response = test_app.get(f"/log/")
     assert response.status_code == 200
+    assert len(response.json()) == 4
+
+@pytest.mark.asyncio
+async def test_log_fetch_pagination(test_setup, clean_collection):
+    test_app, test_collection = test_setup
+    fill_in_test_collection(test_app)
+    response = test_app.get("/log/?event_type=create&event_type=update&last_seen_datetime=2023-02-22T08:47:36.869Z")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+@pytest.mark.asyncio
+async def test_log_fetch_id(test_setup, clean_collection):
+    test_app, test_collection = test_setup
+    fill_in_test_collection(test_app)
+    response = test_app.get(f"/log/?customer_id={service_ids[0]}")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
