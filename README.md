@@ -56,7 +56,7 @@ requirements/cost concerns similar custom service can be implemented.
 ### Main points to consider
 1. #### Throughput, reliability
 Log aggregation is needed, it can be agent on business services themselves or intermediate log aggregator service (like the current one - but with balancer).
-In any case pub-sub system should be used as a queue for all incoming logs (e.g. Kafka)
+In any case pub-sub system should be used as a queue for all incoming logs (e.g. Kafka). On the current service side extra log aggregation can be added to store batch of logs in memory and write it to pubsub/database in batches (downside is that in case of outage some logs can be lost)
 2. #### Easy search over database 
 Current solution uses MongoDB, but it's not the best choice. ElasticSearch or similar 
 solutions can be used to store and retrieve logs.
